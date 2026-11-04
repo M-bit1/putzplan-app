@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Putzplan">
+<meta name="theme-color" content="#127a7a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Putzplan</title>
+<style>
+:root{--bg:#f3f6f6;--card:#fff;--ink:#1d2b2e;--mute:#66797d;--line:#dbe4e5;--acc:#127a7a;--accink:#fff;--empty:#eef3f3}
+@media (prefers-color-scheme:dark){:root{--bg:#141b1c;--card:#1c2627;--ink:#e6eeee;--mute:#92a6a9;--line:#2c3a3c;--acc:#3fb5b0;--accink:#0b1415;--empty:#243133}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
+h1{font-size:20px;margin:0;font-weight:650}
+h2{font-size:15px;margin:0 0 10px;font-weight:650}
+main{display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;padding:16px 20px;align-items:start}
+@media (max-width:1000px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:16px}
+input,select,button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+input[type=text]{width:100%}
+input[type=color]{padding:0;width:30px;height:30px;border:none;background:none;cursor:pointer}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:600}
+:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hdr-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+label.l{font-size:12px;color:var(--mute);display:block;margin-bottom:2px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.form .full{grid-column:1/-1}
+.task{display:grid;grid-template-columns:30px 1fr auto;gap:6px 8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.task .sub{grid-column:2/4;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.task select{padding:4px 6px}
+.del{border:none;background:none;color:var(--mute);font-size:18px;line-height:1;padding:2px 6px}
+.del:hover{color:#c0392b}
+.lock{font-size:12px;color:var(--mute);display:flex;gap:4px;align-items:center}
+.hint{color:var(--mute);font-size:12px;margin:6px 0 0}
+.wrap{overflow-x:auto}
+table.g{border-collapse:separate;border-spacing:0;font-size:11px}
+table.g th,table.g td{padding:0;text-align:center}
+.nm{position:sticky;left:0;background:var(--card);z-index:2;text-align:left!important;min-width:150px;max-width:150px;padding:0 8px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;border-right:1px solid var(--line)}
+.kw{width:19px;min-width:19px;height:24px;color:var(--mute);cursor:pointer;font-size:10px}
+.kw:hover,.kw.sel{background:var(--acc);color:var(--accink)}
+.mo{height:20px;color:var(--mute);font-size:11px;border-left:1px solid var(--line);text-align:left!important;padding-left:4px!important;overflow:hidden;white-space:nowrap}
+td.c{width:19px;min-width:19px;height:24px;border:1px solid var(--card);background:var(--empty);cursor:pointer}
+td.c.on{border-color:transparent;cursor:grab}
+.over{outline:2px solid var(--acc);outline-offset:-2px}
+tr.ro td{box-shadow:inset 0 2px 0 var(--acc)}
+.nm[draggable=true]{cursor:grab}
+input[type=number]{width:64px}
+td.c:hover{outline:2px solid var(--acc);outline-offset:-2px}
+tr.load td{height:26px;font-size:11px;font-weight:600;border:1px solid var(--card)}
+.stats{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 0;font-size:13px;color:var(--mute)}
+.stats b{color:var(--ink)}
+.wk-item{display:flex;gap:8px;align-items:center;padding:3px 0}
+.dot{width:12px;height:12px;border-radius:3px;flex:none}
+@media print{header .hdr-actions,.side,.hint{display:none}main{display:block;padding:0}.card{border:none}.wrap{overflow:visible}body{background:#fff;color:#000}@page{size:A4 landscape;margin:10mm}}
+
+body{padding-bottom:calc(66px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:20;padding-top:calc(10px + env(safe-area-inset-top))}
+.views{max-width:1100px;margin:0 auto;padding:12px}
+.view{display:none}.view.on{display:block}
+.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:30}
+.tabs button{flex:1;border:none;border-radius:0;background:none;padding:13px 4px;color:var(--mute);font-weight:600;font-size:14px}
+.tabs button.on{color:var(--acc)}
+.bar{height:8px;background:var(--empty);border-radius:4px;overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .25s}
+.wk-item.big{padding:12px 4px;border-top:1px solid var(--line);font-size:16px;cursor:pointer;gap:12px}
+.wk-item.big input{width:24px;height:24px;flex:none;accent-color:var(--acc)}
+.wk-item.big.done .t{text-decoration:line-through;color:var(--mute)}
+.sync{font-size:12px;color:var(--mute)}
+input,select{font-size:16px}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<header><h1>Putzplan</h1><span class="sync"></span></header>
+<div class="views">
+<section class="view on" id="v-week"><div class="card">
+  <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+    <button id="wPrev" aria-label="Vorherige Woche">‹</button>
+    <div style="text-align:center"><h2 id="wkTitle" style="margin:0"></h2><div class="hint" id="wkSub" style="margin:2px 0 0"></div></div>
+    <button id="wNext" aria-label="Nächste Woche">›</button></div>
+  <div class="bar"><i id="wBar"></i></div>
+  <div id="wkList"></div>
+  <p style="margin:12px 0 0"><button id="wToday" style="width:100%">Zur aktuellen Woche</button></p>
+</div></section>
+<section class="view" id="v-year"><div class="card">
+  <div class="row" style="margin-bottom:10px"><label>Jahr <input type="number" id="year" min="2000" max="2100" style="width:84px"></label>
+    <button id="auto" class="primary">Optimal verteilen</button></div>
+  <h2>Jahresübersicht <span id="yl" style="color:var(--mute);font-weight:400"></span></h2>
+  <div class="wrap"><table class="g" id="grid"></table></div>
+  <div class="stats" id="stats"></div>
+  <label class="lock" style="margin-top:12px;font-size:13px"><input type="checkbox" id="tapEdit">Start per Tipp auf ein Feld setzen</label>
+  <p class="hint">Tipp auf eine KW öffnet die Wochenliste. Am Computer lassen sich farbige Felder auch ziehen, Zeilen über den Namen umsortieren.</p>
+</div></section>
+<section class="view" id="v-tasks">
+  <div class="card"><h2>Synchronisation</h2>
+    <p class="sync" style="margin:0 0 8px"></p>
+    <label class="l" for="code">Haushalts-Code (auf beiden Geräten identisch)</label>
+    <input type="text" id="code" autocapitalize="off" autocomplete="off" spellcheck="false">
+    <div class="row" style="margin-top:8px"><button id="codeSave" class="primary">Verbinden</button><button id="codeNew">Neuen Code erzeugen</button><button id="codeLink">Einladungslink</button></div>
+  </div>
+  <div class="card"><h2>Neue Tätigkeit</h2><div class="form">
+    <div class="full"><label class="l" for="nName">Name</label><input type="text" id="nName" placeholder="z. B. Bad putzen"></div>
+    <div><label class="l" for="nFreq">Häufigkeit</label><select id="nFreq" style="width:100%"></select></div>
+    <div><label class="l" for="nStart">Start-KW</label><select id="nStart" style="width:100%"></select></div>
+    <div><label class="l" for="nDur">Dauer (Min.)</label><input type="number" id="nDur" min="0" step="5" value="15" style="width:100%"></div>
+    <div style="align-self:end"><button id="add" class="primary" style="width:100%">Hinzufügen</button></div>
+  </div></div>
+  <div class="card"><h2>Tätigkeiten (<span id="cnt">0</span>)</h2><div id="list"></div>
+    <p class="hint">„fix“ hält die Start-KW einer Aufgabe bei „Optimal verteilen“ fest.</p></div>
+  <div class="card"><h2>Datensicherung</h2><div class="row"><button id="export">Exportieren</button><button id="import">Importieren</button><button id="print">Drucken</button></div>
+    <input type="file" id="file" accept=".json" hidden></div>
+</section>
+</div>
+<nav class="tabs"><button class="on" id="t-week" data-tab="week">Woche</button><button id="t-year" data-tab="year">Jahr</button><button id="t-tasks" data-tab="tasks">Aufgaben</button></nav>
+<script>
+const FREQ=[{k:"w1",l:"Wöchentlich",c:52},{k:"w2",l:"2-wöchentlich",c:26},{k:"m1",l:"Monatlich",c:12,mo:1},{k:"m2",l:"2-monatlich",c:6,mo:2},{k:"q",l:"Quartalsweise",c:4,mo:3},{k:"h",l:"Halbjährlich",c:2,mo:6},{k:"y",l:"Einmal im Jahr",c:1,mo:12}];
+const COLORS=["#e6194b","#3cb44b","#4363d8","#f58231","#911eb4","#0fa3b1","#d4a017","#f032e6","#7a9a01","#a0522d","#2f6f9f","#e07a9a"];
+const MONTHS=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+const KEY="putzplan-v1";
+let S={year:new Date().getFullYear(),tasks:[],sel:null,done:{}};
+try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&Array.isArray(r.tasks))S=Object.assign(S,r)}catch(e){}
+S.done=S.done||{};S.tasks.forEach(t=>t.id=String(t.id).replace(/\W/g,""));[S.year,S.sel]=today();
+function today(){const d=new Date(),n=d.getDay()||7,th=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()+4-n));return[th.getUTCFullYear(),isoWeek(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())))]}
+const $=id=>document.getElementById(id);
+const fq=k=>FREQ.find(f=>f.k===k);
+const CK="putzplan-code",FB={apiKey:"AIzaSyCc-WTd8mOBUxyfHrkiAF-ZupoEyCV_LK8",authDomain:"putzplan-app-9f53f.firebaseapp.com",projectId:"putzplan-app-9f53f",appId:"putzplan-app-9f53f"};
+let db=null,ref=null,unsub=null,pushT=null,lastPush="";
+const setStatus=t=>document.querySelectorAll(".sync").forEach(e=>e.textContent=t);
+const keep=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+function save(){keep();const j=JSON.stringify(S.tasks);if(!ref||j===lastPush)return;clearTimeout(pushT);
+  pushT=setTimeout(()=>{lastPush=j;ref.set({tasks:S.tasks},{merge:true}).catch(()=>{})},500)}
+function toggleDone(id,on){const k=S.year+"_"+S.sel+"_"+id;if(on)S.done[k]=true;else delete S.done[k];keep();
+  if(ref)ref.set({done:{[k]:on?true:firebase.firestore.FieldValue.delete()}},{merge:true}).catch(()=>{});renderGrid()}
+function connect(){if(unsub){unsub();unsub=null}ref=null;const code=localStorage.getItem(CK)||"";
+  if(!code)return setStatus("Nur lokal (kein Haushalts-Code)");
+  if(FB.apiKey.startsWith("DEIN")||typeof firebase==="undefined")return setStatus("Nur lokal (Firebase nicht eingerichtet)");
+  if(!db){firebase.initializeApp(FB);db=firebase.firestore();db.enablePersistence({synchronizeTabs:true}).catch(()=>{})}
+  ref=db.collection("haushalte").doc(code);
+  unsub=ref.onSnapshot(snap=>{
+    if(!snap.exists){if(!snap.metadata.fromCache)ref.set({tasks:S.tasks,done:S.done},{merge:true});return}
+    const d=snap.data();S.done=d.done||{};
+    if(Array.isArray(d.tasks)&&!snap.metadata.hasPendingWrites&&!$("list").contains(document.activeElement)){S.tasks=d.tasks;lastPush=JSON.stringify(S.tasks);renderList()}
+    keep();renderGrid();setStatus(snap.metadata.fromCache?"Offline-Daten":"● Synchronisiert")},e=>setStatus("Sync-Fehler: "+e.code))}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dur=t=>Math.max(0,+t.dur||0);
+const hh=m=>(m/60).toFixed(1).replace(".",",");
+const sorted=()=>S.tasks.map((t,i)=>[t,i]).sort((a,b)=>fq(b[0].freq).c-fq(a[0].freq).c||a[1]-b[1]).map(x=>x[0]);
+
+function isoWeek(d){d=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()));const n=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-n);const y0=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil(((d-y0)/864e5+1)/7)}
+const nWeeks=y=>isoWeek(new Date(Date.UTC(y,11,28)));
+function monday(y,k){const j=new Date(Date.UTC(y,0,4));const n=j.getUTCDay()||7;return new Date(j.getTime()+((k-1)*7-(n-1))*864e5)}
+const fmt=d=>d.getUTCDate()+"."+(d.getUTCMonth()+1)+".";
+const calC={};
+function cal(y){if(calC[y])return calC[y];const N=nWeeks(y),mon=[],byM=Array.from({length:12},()=>[]);
+  for(let k=1;k<=N;k++){const m=new Date(monday(y,k).getTime()+3*864e5).getUTCMonth();mon[k]=m;byM[m].push(k)}
+  return calC[y]={N,mon,byM}}
+// Rhythmus: wöchentlich/2-wöchentlich in Wochen ab Start, alle übrigen in Kalendermonaten ab dem Start-Monat (gleiche Woche im Monat)
+function weeksOf(t){const C=cal(S.year),N=C.N,s=Math.min(Math.max(+t.start||1,1),N),r=new Set(),f=fq(t.freq);
+  if(f.k==="w1"){for(let w=1;w<=N;w++)r.add(w);return r}
+  if(f.k==="w2"){for(let w=1;w<=N;w++)if(((w-s)%2+2)%2===0)r.add(w);return r}
+  const am=C.mon[s],j=C.byM[am].indexOf(s);
+  for(let m=0;m<12;m++)if((((m-am)%f.mo)+f.mo)%f.mo===0){const a=C.byM[m];r.add(a[Math.min(j,a.length-1)])}
+  return r}
+
+function fillSelects(){const N=nWeeks(S.year);
+  $("nFreq").innerHTML=FREQ.map(f=>`<option value="${f.k}">${f.l}</option>`).join("");
+  const keep=$("nStart").value;
+  $("nStart").innerHTML=Array.from({length:N},(_,i)=>`<option value="${i+1}">KW ${i+1}</option>`).join("");
+  if(keep)$("nStart").value=Math.min(+keep,N)}
+
+function renderList(){const N=nWeeks(S.year);$("cnt").textContent=S.tasks.length;
+  $("list").innerHTML=S.tasks.length?sorted().map(t=>`<div class="task" data-id="${t.id}">
+    <input type="color" value="${t.color}" data-f="color" aria-label="Farbe">
+    <input type="text" value="${esc(t.name)}" data-f="name" aria-label="Name">
+    <button class="del" data-del title="Löschen">×</button>
+    <div class="sub">
+      <select data-f="freq">${FREQ.map(f=>`<option value="${f.k}"${f.k===t.freq?" selected":""}>${f.l}</option>`).join("")}</select>
+      <select data-f="start">${Array.from({length:N},(_,i)=>`<option value="${i+1}"${i+1===Math.min(t.start,N)?" selected":""}>KW ${i+1}</option>`).join("")}</select>
+      <input type="number" min="0" step="5" value="${dur(t)}" data-f="dur" aria-label="Dauer in Minuten" title="Dauer in Minuten">Min.
+      <label class="lock"><input type="checkbox" data-f="lock"${t.lock?" checked":""}>fix</label>
+    </div></div>`).join(""):'<p class="hint">Noch keine Tätigkeiten. Fügen Sie oben die erste hinzu.</p>'}
+
+function renderGrid(){const C=cal(S.year),N=C.N;$("yl").textContent=`${S.year} · ${N} Kalenderwochen`;
+  const T=sorted(),lc=Array(N).fill(0),lm=Array(N).fill(0);
+  const sets=T.map(t=>{const s=weeksOf(t);s.forEach(w=>{lc[w-1]++;lm[w-1]+=dur(t)});return s});
+  let mh='<tr><th class="nm"></th>',cur=-1,span=0,lab="";const flush=()=>{if(span)mh+=`<th class="mo" colspan="${span}">${lab}</th>`};
+  for(let k=1;k<=N;k++){const m=C.mon[k];if(m!==cur){flush();cur=m;span=0;lab=MONTHS[m]}span++}flush();mh+="</tr>";
+  const kh='<tr><th class="nm">Kalenderwoche</th>'+Array.from({length:N},(_,i)=>`<th class="kw${S.sel===i+1?" sel":""}" data-kw="${i+1}">${i+1}</th>`).join("")+"</tr>";
+  const rows=T.map((t,ti)=>`<tr><td class="nm" draggable="true" data-t="${t.id}" title="${esc(t.name)} · ${fq(t.freq).l}${dur(t)?" · "+dur(t)+" Min.":""}"><span class="dot" style="display:inline-block;background:${t.color};margin-right:6px;vertical-align:-1px"></span>${esc(t.name)||"–"}</td>`+
+    Array.from({length:N},(_,i)=>{const on=sets[ti].has(i+1);return `<td class="c${on?" on":""}" data-t="${t.id}" data-w="${i+1}"${on?` draggable="true" style="background:${t.color}"`:""}></td>`}).join("")+"</tr>").join("");
+  const mc=Math.max(1,...lc),mm=Math.max(1,...lm);
+  const lr='<tr class="load"><td class="nm">Aufgaben pro Woche</td>'+lc.map(v=>{const a=v?(0.15+0.7*v/mc):0;return `<td style="background:rgba(18,122,122,${a.toFixed(2)});color:${a>.5?"#fff":"inherit"}">${v||""}</td>`}).join("")+"</tr>";
+  const lh='<tr class="load"><td class="nm">Dauer pro Woche (Std.)</td>'+lm.map(v=>{const a=v?(0.15+0.7*v/mm):0;return `<td title="${v} Min." style="font-size:9px;background:rgba(201,110,20,${a.toFixed(2)});color:${a>.5?"#fff":"inherit"}">${v?hh(v):""}</td>`}).join("")+"</tr>";
+  $("grid").innerHTML=mh+kh+rows+lr+lh;
+  const tot=lc.reduce((a,b)=>a+b,0),mn=Math.min(...lc),tm=lm.reduce((a,b)=>a+b,0),mnm=Math.min(...lm);
+  $("stats").innerHTML=S.tasks.length?`<span>Aufgaben/Woche: Ø <b>${(tot/N).toFixed(1)}</b>, min <b>${mn}</b>, max <b>${mc>1||lc.some(v=>v)?Math.max(...lc):0}</b></span>`+
+    (tm?`<span>Dauer/Woche: Ø <b>${hh(tm/N)} Std.</b>, min <b>${hh(mnm)}</b>, max <b>${hh(Math.max(...lm))}</b></span><span>Gesamt im Jahr: <b>${hh(tm)} Std.</b></span>`:"")+`<span>Einsätze im Jahr: <b>${tot}</b></span>`:"";
+  renderWeek(T,sets)}
+
+function renderWeek(T,sets){const N=nWeeks(S.year);if(!S.sel||S.sel>N)S.sel=Math.min(S.sel||1,N);
+  const m=monday(S.year,S.sel),e=new Date(m.getTime()+6*864e5),items=T.filter((t,i)=>sets[i].has(S.sel));
+  const dk=t=>S.year+"_"+S.sel+"_"+t.id,open=items.filter(t=>!S.done[dk(t)]),left=open.reduce((a,t)=>a+dur(t),0);
+  $("wkTitle").textContent="KW "+S.sel+" · "+S.year;
+  $("wkSub").textContent=fmt(m)+" – "+fmt(e)+e.getUTCFullYear()+(items.length?" · "+(items.length-open.length)+" von "+items.length+" erledigt"+(left?" · noch "+left+" Min.":""):"");
+  $("wBar").style.width=(items.length?100*(items.length-open.length)/items.length:0)+"%";
+  $("wkList").innerHTML=items.length?items.map(t=>`<label class="wk-item big${S.done[dk(t)]?" done":""}"><input type="checkbox" data-done="${t.id}"${S.done[dk(t)]?" checked":""}><span class="dot" style="background:${t.color}"></span><span class="t">${esc(t.name)}<small style="display:block;color:var(--mute);font-size:12px">${fq(t.freq).l}${dur(t)?" · "+dur(t)+" Min.":""}</small></span></label>`).join(""):'<p class="hint">In dieser Woche ist nichts fällig.</p>';
+  $("grid").querySelectorAll(".kw").forEach(el=>el.classList.toggle("sel",+el.dataset.kw===S.sel))}
+
+// Verteilung: berücksichtigt Anzahl der Aufgaben UND Gesamtdauer pro Woche
+function addLoad(t,sg,lc,lm){weeksOf(t).forEach(w=>{lc[w-1]+=sg;lm[w-1]+=sg*dur(t)})}
+function bestStart(t,lc,lm,mb){const N=nWeeks(S.year),d=dur(t);let best=1,bc=Infinity;
+  for(let s=1;s<=N;s++){let c=0;weeksOf({freq:t.freq,start:s}).forEach(p=>{c+=(lc[p-1]+1)**2+((lm[p-1]+d)/mb)**2});if(c<bc-1e-9){bc=c;best=s}}
+  return best}
+function autoBalance(){const N=nWeeks(S.year),lc=Array(N).fill(0),lm=Array(N).fill(0);
+  S.tasks.filter(t=>t.lock).forEach(t=>addLoad(t,1,lc,lm));
+  const free=S.tasks.filter(t=>!t.lock).sort((a,b)=>fq(b.freq).c-fq(a.freq).c||dur(b)-dur(a));
+  const ds=S.tasks.filter(t=>dur(t)>0).map(dur),mb=ds.length?ds.reduce((a,b)=>a+b,0)/ds.length:1;
+  free.forEach(t=>{t.start=bestStart(t,lc,lm,mb);addLoad(t,1,lc,lm)});
+  for(let p=0;p<3;p++)free.forEach(t=>{addLoad(t,-1,lc,lm);t.start=bestStart(t,lc,lm,mb);addLoad(t,1,lc,lm)})}
+
+function all(){save();renderList();renderGrid()}
+$("year").value=S.year;
+$("year").addEventListener("change",e=>{const y=+e.target.value;if(y>=2000&&y<=2100){S.year=y;S.sel=null;fillSelects();all()}});
+$("add").addEventListener("click",()=>{const n=$("nName").value.trim();if(!n){$("nName").focus();return}
+  S.tasks.push({id:Math.random().toString(36).slice(2,9),name:n,freq:$("nFreq").value,start:+$("nStart").value,dur:Math.max(0,+$("nDur").value||0),color:COLORS[S.tasks.length%COLORS.length],lock:false});
+  $("nName").value="";all();$("nName").focus()});
+$("nName").addEventListener("keydown",e=>{if(e.key==="Enter")$("add").click()});
+$("auto").addEventListener("click",()=>{if(S.tasks.length){autoBalance();all()}});
+$("print").addEventListener("click",()=>window.print());
+const tOf=e=>{const id=e.target.closest(".task")?.dataset.id;return S.tasks.find(x=>String(x.id)===id)};
+$("list").addEventListener("input",e=>{const f=e.target.dataset.f,t=tOf(e);if(!t||!f)return;
+  if(f==="name"||f==="color"){t[f]=e.target.value;save();renderGrid()}
+  else if(f==="dur"){t.dur=Math.max(0,+e.target.value||0);save();renderGrid()}});
+$("list").addEventListener("change",e=>{const f=e.target.dataset.f,t=tOf(e);if(!t||!f)return;
+  if(f==="freq")t.freq=e.target.value;else if(f==="start")t.start=+e.target.value;else if(f==="lock")t.lock=e.target.checked;else return;
+  save();f==="freq"?all():renderGrid()});
+$("list").addEventListener("click",e=>{if(!e.target.hasAttribute("data-del"))return;const id=e.target.closest(".task").dataset.id;
+  S.tasks=S.tasks.filter(x=>String(x.id)!==id);all()});
+// Klick + Drag&Drop in der Übersicht
+const G=$("grid");let drag=null;
+G.addEventListener("click",e=>{const kw=e.target.closest("[data-kw]");if(kw){S.sel=+kw.dataset.kw;renderGrid();showTab("week");return}
+  const c=e.target.closest("td.c");if(!c||!$("tapEdit").checked)return;const t=S.tasks.find(x=>String(x.id)===c.dataset.t);if(!t)return;
+  t.start=+c.dataset.w;S.sel=t.start;all()});
+const clr=()=>G.querySelectorAll(".over,.ro").forEach(x=>x.classList.remove("over","ro"));
+G.addEventListener("dragstart",e=>{const c=e.target.closest("td[data-t]");if(!c)return;
+  drag={id:c.dataset.t,type:c.classList.contains("nm")?"row":"cell"};e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain","x")});
+G.addEventListener("dragover",e=>{const c=e.target.closest("td[data-t]");if(!drag||!c)return;
+  if(drag.type==="cell"){if(c.dataset.t!==drag.id||!c.dataset.w)return;e.preventDefault();clr();c.classList.add("over")}
+  else{if(c.dataset.t===drag.id)return;e.preventDefault();clr();c.closest("tr").classList.add("ro")}});
+G.addEventListener("drop",e=>{const c=e.target.closest("td[data-t]");if(!drag||!c)return;e.preventDefault();
+  if(drag.type==="cell"){const t=S.tasks.find(x=>String(x.id)===drag.id);if(t&&c.dataset.w&&c.dataset.t===drag.id){t.start=+c.dataset.w;S.sel=t.start}}
+  else{const i=S.tasks.findIndex(x=>String(x.id)===drag.id),j0=S.tasks.findIndex(x=>String(x.id)===c.dataset.t);
+    if(i>-1&&j0>-1){const [m]=S.tasks.splice(i,1);S.tasks.splice(S.tasks.findIndex(x=>String(x.id)===c.dataset.t),0,m)}}
+  drag=null;all()});
+G.addEventListener("dragend",()=>{clr();drag=null});
+$("export").addEventListener("click",()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:"application/json"}));a.download="putzplan.json";a.click()});
+$("import").addEventListener("click",()=>$("file").click());
+$("file").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.tasks))throw 0;S=Object.assign({year:S.year,sel:null,done:S.done},d);S.tasks.forEach(t=>t.id=String(t.id).replace(/\W/g,""));$("year").value=S.year;fillSelects();all()}catch(x){alert("Die Datei konnte nicht gelesen werden.")}};
+  r.readAsText(f);e.target.value=""});
+const q=new URLSearchParams(location.search).get("h");if(q){localStorage.setItem(CK,q.replace(/[^\w-]/g,""));history.replaceState(null,"",location.pathname)}
+$("code").value=localStorage.getItem(CK)||"";
+function showTab(n){["week","year","tasks"].forEach(x=>{$("v-"+x).classList.toggle("on",x===n);$("t-"+x).classList.toggle("on",x===n)});scrollTo(0,0)}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+function setWeek(y,k){S.year=y;S.sel=k;$("year").value=y;fillSelects();renderList();renderGrid()}
+$("wPrev").onclick=()=>{let k=S.sel-1,y=S.year;if(k<1){y--;k=nWeeks(y)}setWeek(y,k)};
+$("wNext").onclick=()=>{let k=S.sel+1,y=S.year;if(k>nWeeks(y)){y++;k=1}setWeek(y,k)};
+$("wToday").onclick=()=>setWeek(...today());
+$("wkList").addEventListener("change",e=>{const id=e.target.dataset.done;if(id)toggleDone(id,e.target.checked)});
+$("codeSave").onclick=()=>{const c=$("code").value.trim().replace(/[^\w-]/g,"");if(c.length<16)return alert("Der Haushalts-Code braucht mindestens 16 Zeichen (Buchstaben, Ziffern, Bindestrich). Tipp: „Neuen Code erzeugen“.");$("code").value=c;localStorage.setItem(CK,c);connect()};
+$("codeNew").onclick=()=>{const c=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>b.toString(36).padStart(2,"0")).join("");$("code").value=c;localStorage.setItem(CK,c);connect()};
+$("codeLink").onclick=()=>{const c=localStorage.getItem(CK);if(!c)return alert("Bitte zuerst einen Haushalts-Code speichern.");const u=location.origin+location.pathname+"?h="+encodeURIComponent(c);if(navigator.share)navigator.share({url:u}).catch(()=>{});else navigator.clipboard.writeText(u).then(()=>alert("Link kopiert"))};
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");
+fillSelects();all();connect();
+
+</script>
+</body>
+</html>
