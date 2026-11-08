@@ -18,18 +18,16 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",sy
 header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
 h1{font-size:20px;margin:0;font-weight:650}
 h2{font-size:15px;margin:0 0 10px;font-weight:650}
-main{display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;padding:16px 20px;align-items:start}
-@media (max-width:1000px){main{grid-template-columns:1fr}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:16px}
 input,select,button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
 input[type=text]{width:100%}
 input[type=color]{padding:0;width:30px;height:30px;border:none;background:none;cursor:pointer}
 button{cursor:pointer}
 button:hover{border-color:var(--acc)}
+button:disabled{opacity:.5;cursor:default}
 button.primary{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:600}
 :focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.hdr-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 label.l{font-size:12px;color:var(--mute);display:block;margin-bottom:2px}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .form .full{grid-column:1/-1}
@@ -47,19 +45,24 @@ table.g th,table.g td{padding:0;text-align:center}
 .kw{width:19px;min-width:19px;height:24px;color:var(--mute);cursor:pointer;font-size:10px}
 .kw:hover,.kw.sel{background:var(--acc);color:var(--accink)}
 .mo{height:20px;color:var(--mute);font-size:11px;border-left:1px solid var(--line);text-align:left!important;padding-left:4px!important;overflow:hidden;white-space:nowrap}
-td.c{width:19px;min-width:19px;height:24px;border:1px solid var(--card);background:var(--empty);cursor:pointer}
+td.c{width:19px;min-width:19px;height:24px;border:1px solid var(--card);background:var(--empty);cursor:pointer;color:#fff;font-size:10px;font-weight:700}
 td.c.on{border-color:transparent;cursor:grab}
+td.c.dn{opacity:.6}
+td.c.ms{opacity:.3}
+.pre,td.c.pre{background:repeating-linear-gradient(45deg,var(--empty) 0 3px,transparent 3px 6px)!important;cursor:default}
 .over{outline:2px solid var(--acc);outline-offset:-2px}
 tr.ro td{box-shadow:inset 0 2px 0 var(--acc)}
 .nm[draggable=true]{cursor:grab}
 input[type=number]{width:64px}
-td.c:hover{outline:2px solid var(--acc);outline-offset:-2px}
+td.c:not(.pre):hover{outline:2px solid var(--acc);outline-offset:-2px}
 tr.load td{height:26px;font-size:11px;font-weight:600;border:1px solid var(--card)}
 .stats{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 0;font-size:13px;color:var(--mute)}
 .stats b{color:var(--ink)}
-.wk-item{display:flex;gap:8px;align-items:center;padding:3px 0}
 .dot{width:12px;height:12px;border-radius:3px;flex:none}
-@media print{header .hdr-actions,.side,.hint{display:none}main{display:block;padding:0}.card{border:none}.wrap{overflow:visible}body{background:#fff;color:#000}@page{size:A4 landscape;margin:10mm}}
+table.sum{width:100%;border-collapse:collapse;font-size:13px}
+table.sum th,table.sum td{text-align:left;padding:6px 8px;border-top:1px solid var(--line)}
+table.sum th{color:var(--mute);font-weight:600;font-size:12px}
+@media print{.tabs,.side,.hint,#v-week,#v-tasks{display:none}.card{border:none}.wrap{overflow:visible}body{background:#fff;color:#000;padding:0}@page{size:A4 landscape;margin:10mm}}
 
 body{padding-bottom:calc(66px + env(safe-area-inset-bottom))}
 header{position:sticky;top:0;z-index:20;padding-top:calc(10px + env(safe-area-inset-top))}
@@ -70,9 +73,21 @@ header{position:sticky;top:0;z-index:20;padding-top:calc(10px + env(safe-area-in
 .tabs button.on{color:var(--acc)}
 .bar{height:8px;background:var(--empty);border-radius:4px;overflow:hidden;margin:10px 0}
 .bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .25s}
-.wk-item.big{padding:12px 4px;border-top:1px solid var(--line);font-size:16px;cursor:pointer;gap:12px}
-.wk-item.big input{width:24px;height:24px;flex:none;accent-color:var(--acc)}
-.wk-item.big.done .t{text-decoration:line-through;color:var(--mute)}
+.wk-item.big{display:flex;align-items:center;gap:12px;padding:12px 8px;border-top:1px solid var(--line);font-size:16px;cursor:pointer}
+.wk-item.big input.ck{width:24px;height:24px;flex:none;accent-color:var(--acc);margin:0}
+.wk-item.big .t{flex:1;min-width:0}
+.wk-item.big .t small{display:block;color:var(--mute);font-size:12px}
+.wk-item.big.done .nmx{text-decoration:line-through;color:var(--mute)}
+.wk-item.big.over1{background:rgba(232,176,0,.16);box-shadow:inset 4px 0 0 #e0a800}
+.wk-item.big.over2{background:rgba(214,48,49,.13);box-shadow:inset 4px 0 0 #d63031}
+.tag{font-size:11px;font-weight:650;padding:1px 7px;border-radius:9px;margin-left:6px;vertical-align:2px;white-space:nowrap}
+.tag.y{background:#e0a800;color:#1d2b2e}.tag.r{background:#d63031;color:#fff}.tag.x{background:var(--empty);color:var(--mute)}
+.pcs{display:flex;gap:4px;flex:none;flex-wrap:wrap}
+.pc{min-width:34px;padding:5px 8px;border-radius:16px;font-size:12px;font-weight:650;color:var(--mute)}
+.pc.on{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+.sec{font-size:12px;color:var(--mute);font-weight:650;margin:18px 0 0;padding-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:18px;width:min(92vw,380px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
 .sync{font-size:12px;color:var(--mute)}
 input,select{font-size:16px}
 </style>
@@ -89,6 +104,7 @@ input,select{font-size:16px}
     <button id="wNext" aria-label="Nächste Woche">›</button></div>
   <div class="bar"><i id="wBar"></i></div>
   <div id="wkList"></div>
+  <div class="row" id="wAddRow" style="margin-top:16px;flex-wrap:nowrap"><select id="wAdd" style="flex:1;min-width:0" aria-label="Zusätzliche Tätigkeit"></select><button id="wAddBtn">Hinzufügen</button></div>
   <p style="margin:12px 0 0"><button id="wToday" style="width:100%">Zur aktuellen Woche</button></p>
 </div></section>
 <section class="view" id="v-year"><div class="card">
@@ -98,8 +114,9 @@ input,select{font-size:16px}
   <div class="wrap"><table class="g" id="grid"></table></div>
   <div class="stats" id="stats"></div>
   <label class="lock" style="margin-top:12px;font-size:13px"><input type="checkbox" id="tapEdit">Start per Tipp auf ein Feld setzen</label>
-  <p class="hint">Tipp auf eine KW öffnet die Wochenliste. Am Computer lassen sich farbige Felder auch ziehen, Zeilen über den Namen umsortieren.</p>
-</div></section>
+  <p class="hint">Tipp auf eine KW öffnet die Wochenliste. ✓ = erledigt, blasse Felder = verpasst, schraffiert = vor dem Planstart. „Optimal verteilen“ gleicht die Minuten pro Woche aus.</p>
+</div>
+<div class="card" id="sum"></div></section>
 <section class="view" id="v-tasks">
   <div class="card"><h2>Synchronisation</h2>
     <p class="sync" style="margin:0 0 8px"></p>
@@ -107,6 +124,12 @@ input,select{font-size:16px}
     <input type="text" id="code" autocapitalize="off" autocomplete="off" spellcheck="false">
     <div class="row" style="margin-top:8px"><button id="codeSave" class="primary">Verbinden</button><button id="codeNew">Neuen Code erzeugen</button><button id="codeLink">Einladungslink</button></div>
   </div>
+  <div class="card"><h2>Planstart</h2>
+    <div class="row"><label>Jahr <input type="number" id="psY" min="2000" max="2100" style="width:84px"></label><label>KW <select id="psW"></select></label><button id="psNow">Ab dieser Woche</button></div>
+    <p class="hint" id="psHint"></p></div>
+  <div class="card"><h2>Personen</h2><div id="ppl"></div>
+    <div class="row" style="margin-top:8px;flex-wrap:nowrap"><input type="text" id="pK" placeholder="Kürzel" maxlength="3" style="width:80px"><input type="text" id="pN" placeholder="Name (optional)" style="flex:1;width:auto;min-width:0"><button id="pAdd" class="primary">Hinzufügen</button></div>
+    <p class="hint">Mit den Kürzeln teilen Sie Aufgaben zu und halten fest, wer sie erledigt hat. Die Standardzuteilung legen Sie unten bei jeder Tätigkeit fest, im Reiter Woche können Sie sie pro Woche ändern.</p></div>
   <div class="card"><h2>Neue Tätigkeit</h2><div class="form">
     <div class="full"><label class="l" for="nName">Name</label><input type="text" id="nName" placeholder="z. B. Bad putzen"></div>
     <div><label class="l" for="nFreq">Häufigkeit</label><select id="nFreq" style="width:100%"></select></div>
@@ -121,62 +144,110 @@ input,select{font-size:16px}
 </section>
 </div>
 <nav class="tabs"><button class="on" id="t-week" data-tab="week">Woche</button><button id="t-year" data-tab="year">Jahr</button><button id="t-tasks" data-tab="tasks">Aufgaben</button></nav>
+<dialog id="dlg"><form method="dialog">
+  <h2 id="dT" style="margin-bottom:12px"></h2>
+  <label class="l" for="dMin">Tatsächliche Dauer (Min.)</label>
+  <input type="number" id="dMin" min="0" step="5" inputmode="numeric" style="width:100%">
+  <div id="dPWrap"><label class="l" style="margin-top:12px">Erledigt von</label><div class="pcs" id="dP"></div></div>
+  <div class="row" style="margin-top:18px;justify-content:flex-end"><button type="button" id="dCancel">Abbrechen</button><button value="ok" class="primary">Erledigt</button></div>
+</form></dialog>
 <script>
 const FREQ=[{k:"w1",l:"Wöchentlich",c:52},{k:"w2",l:"2-wöchentlich",c:26},{k:"m1",l:"Monatlich",c:12,mo:1},{k:"m2",l:"2-monatlich",c:6,mo:2},{k:"q",l:"Quartalsweise",c:4,mo:3},{k:"h",l:"Halbjährlich",c:2,mo:6},{k:"y",l:"Einmal im Jahr",c:1,mo:12}];
 const COLORS=["#e6194b","#3cb44b","#4363d8","#f58231","#911eb4","#0fa3b1","#d4a017","#f032e6","#7a9a01","#a0522d","#2f6f9f","#e07a9a"];
 const MONTHS=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
 const KEY="putzplan-v1";
-let S={year:new Date().getFullYear(),tasks:[],sel:null,done:{}};
+let S={year:new Date().getFullYear(),tasks:[],sel:null,done:{},extra:{},asg:{},people:[],settings:{}};
 try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&Array.isArray(r.tasks))S=Object.assign(S,r)}catch(e){}
-S.done=S.done||{};S.tasks.forEach(t=>t.id=String(t.id).replace(/\W/g,""));[S.year,S.sel]=today();
+function norm(){["done","extra","asg","settings"].forEach(f=>{if(!S[f]||typeof S[f]!=="object"||Array.isArray(S[f]))S[f]={}});
+  if(!Array.isArray(S.people))S.people=[];if(!Array.isArray(S.tasks))S.tasks=[];
+  S.tasks.forEach(t=>{t.id=String(t.id).replace(/\W/g,"");if(!Array.isArray(t.who))t.who=[];if(!t.ay)t.ay=new Date().getFullYear()})}
+norm();[S.year,S.sel]=today();
 function today(){const d=new Date(),n=d.getDay()||7,th=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()+4-n));return[th.getUTCFullYear(),isoWeek(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())))]}
 const $=id=>document.getElementById(id);
-const fq=k=>FREQ.find(f=>f.k===k);
+const fq=k=>FREQ.find(f=>f.k===k)||FREQ[0];
 const CK="putzplan-code",FB={apiKey:"AIzaSyCc-WTd8mOBUxyfHrkiAF-ZupoEyCV_LK8",authDomain:"putzplan-app-9f53f.firebaseapp.com",projectId:"putzplan-app-9f53f",appId:"putzplan-app-9f53f"};
 let db=null,ref=null,unsub=null,pushT=null,lastPush="";
 const setStatus=t=>document.querySelectorAll(".sync").forEach(e=>e.textContent=t);
 const keep=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-function save(){keep();const j=JSON.stringify(S.tasks);if(!ref||j===lastPush)return;clearTimeout(pushT);
-  pushT=setTimeout(()=>{lastPush=j;ref.set({tasks:S.tasks},{merge:true}).catch(()=>{})},500)}
-function toggleDone(id,on){const k=S.year+"_"+S.sel+"_"+id;if(on)S.done[k]=true;else delete S.done[k];keep();
-  if(ref)ref.set({done:{[k]:on?true:firebase.firestore.FieldValue.delete()}},{merge:true}).catch(()=>{});renderGrid()}
+const cfg=()=>JSON.stringify([S.tasks,S.people,S.settings]);
+// Aufgaben, Personen, Einstellungen gesammelt hochladen
+function save(){keep();const j=cfg();if(!ref||j===lastPush)return;clearTimeout(pushT);
+  pushT=setTimeout(()=>{lastPush=j;ref.set({tasks:S.tasks,people:S.people,settings:S.settings},{merge:true}).catch(()=>{})},500)}
+// Einzelwert in done / extra / asg setzen (undefined = löschen)
+function put(f,k,v){if(v===undefined)delete S[f][k];else S[f][k]=v;keep();
+  if(ref)ref.set({[f]:{[k]:v===undefined?firebase.firestore.FieldValue.delete():v}},{merge:true}).catch(()=>{});renderGrid()}
 function connect(){if(unsub){unsub();unsub=null}ref=null;const code=localStorage.getItem(CK)||"";
   if(!code)return setStatus("Nur lokal (kein Haushalts-Code)");
   if(FB.apiKey.startsWith("DEIN")||typeof firebase==="undefined")return setStatus("Nur lokal (Firebase nicht eingerichtet)");
   if(!db){firebase.initializeApp(FB);db=firebase.firestore();db.enablePersistence({synchronizeTabs:true}).catch(()=>{})}
   ref=db.collection("haushalte").doc(code);
   unsub=ref.onSnapshot(snap=>{
-    if(!snap.exists){if(!snap.metadata.fromCache)ref.set({tasks:S.tasks,done:S.done},{merge:true});return}
-    const d=snap.data();S.done=d.done||{};
-    if(Array.isArray(d.tasks)&&!snap.metadata.hasPendingWrites&&!$("list").contains(document.activeElement)){S.tasks=d.tasks;lastPush=JSON.stringify(S.tasks);renderList()}
-    keep();renderGrid();setStatus(snap.metadata.fromCache?"Offline-Daten":"● Synchronisiert")},e=>setStatus("Sync-Fehler: "+e.code))}
+    if(!snap.exists){if(!snap.metadata.fromCache)ref.set({tasks:S.tasks,done:S.done,extra:S.extra,asg:S.asg,people:S.people,settings:S.settings},{merge:true});return}
+    const d=snap.data();S.done=d.done||{};S.extra=d.extra||{};S.asg=d.asg||{};
+    const ae=document.activeElement,editing=!!ae&&$("v-tasks").contains(ae)&&ae.matches("input,select");
+    if(!snap.metadata.hasPendingWrites&&!editing){if(Array.isArray(d.tasks))S.tasks=d.tasks;if(Array.isArray(d.people))S.people=d.people;
+      if(d.settings&&typeof d.settings==="object")S.settings=d.settings;norm();lastPush=cfg();renderList();renderPeople();renderSettings()}
+    norm();keep();renderGrid();setStatus(snap.metadata.fromCache?"Offline-Daten":"● Synchronisiert")},e=>setStatus("Sync-Fehler: "+e.code))}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const dur=t=>Math.max(0,+t.dur||0);
 const hh=m=>(m/60).toFixed(1).replace(".",",");
 const sorted=()=>S.tasks.map((t,i)=>[t,i]).sort((a,b)=>fq(b[0].freq).c-fq(a[0].freq).c||a[1]-b[1]).map(x=>x[0]);
 
+// ---------- Kalender ----------
 function isoWeek(d){d=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()));const n=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-n);const y0=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil(((d-y0)/864e5+1)/7)}
 const nWeeks=y=>isoWeek(new Date(Date.UTC(y,11,28)));
 function monday(y,k){const j=new Date(Date.UTC(y,0,4));const n=j.getUTCDay()||7;return new Date(j.getTime()+((k-1)*7-(n-1))*864e5)}
 const fmt=d=>d.getUTCDate()+"."+(d.getUTCMonth()+1)+".";
+// Fortlaufende Wochennummer über Jahresgrenzen hinweg (0 = KW 1/2000)
+const DAY=864e5,WKMS=7*DAY,BASE=Date.UTC(2000,0,3);
+const A=(y,w)=>Math.round((monday(y,w).getTime()-BASE)/WKMS);
+function YW(a){const m=new Date(BASE+a*WKMS);return[new Date(m.getTime()+3*DAY).getUTCFullYear(),isoWeek(m)]}
+const ywS=a=>YW(a).join("_");
+const pYW=s=>{const p=String(s).split("_");return A(+p[0],+p[1])};
+const kOf=(a,id)=>ywS(a)+"_"+id;
+const kSplit=k=>{const p=k.split("_");return{a:A(+p[0],+p[1]),id:p.slice(2).join("_")}};
+const nowA=()=>A(...today());
+const PS=()=>S.settings.planStart?pYW(S.settings.planStart):A(today()[0],1);
+const recOf=k=>{const r=S.done[k];return r===true?{}:(r&&typeof r==="object"?r:null)};
+const cAt=(r,a)=>r&&r.at?pYW(r.at):a;
 const calC={};
 function cal(y){if(calC[y])return calC[y];const N=nWeeks(y),mon=[],byM=Array.from({length:12},()=>[]);
   for(let k=1;k<=N;k++){const m=new Date(monday(y,k).getTime()+3*864e5).getUTCMonth();mon[k]=m;byM[m].push(k)}
   return calC[y]={N,mon,byM}}
-// Rhythmus: wöchentlich/2-wöchentlich in Wochen ab Start, alle übrigen in Kalendermonaten ab dem Start-Monat (gleiche Woche im Monat)
-function weeksOf(t){const C=cal(S.year),N=C.N,s=Math.min(Math.max(+t.start||1,1),N),r=new Set(),f=fq(t.freq);
+// Grundplan: wöchentlich jede Woche, 2-wöchentlich durchgehend im Takt (auch über den Jahreswechsel),
+// alle übrigen in Kalendermonaten ab dem Start-Monat (gleiche Woche im Monat)
+function weeksOf(t,y=S.year){const C=cal(y),N=C.N,s=Math.min(Math.max(+t.start||1,1),N),r=new Set(),f=fq(t.freq);
   if(f.k==="w1"){for(let w=1;w<=N;w++)r.add(w);return r}
-  if(f.k==="w2"){for(let w=1;w<=N;w++)if(((w-s)%2+2)%2===0)r.add(w);return r}
+  if(f.k==="w2"){const ay=+t.ay||y,a0=A(ay,Math.min(s,nWeeks(ay))),b=A(y,1);for(let w=1;w<=N;w++)if(((b+w-1-a0)%2+2)%2===0)r.add(w);return r}
   const am=C.mon[s],j=C.byM[am].indexOf(s);
   for(let m=0;m<12;m++)if((((m-am)%f.mo)+f.mo)%f.mo===0){const a=C.byM[m];r.add(a[Math.min(j,a.length-1)])}
   return r}
 
+// ---------- Tatsächlicher Ablauf ----------
+// Ab dem Planstart wird jeder Termin aus dem Grundplan durchlaufen. Wird eine Aufgabe später erledigt
+// oder per „zusätzlich“ vorgezogen, verschieben sich alle folgenden Termine um diese Differenz.
+// Nach einer Planänderung (Start, Häufigkeit, Verteilen) gilt ab dann wieder der Grundplan.
+let SCH=new Map(),USED=new Set();
+function build(){SCH=new Map();USED=new Set();const ps=PS(),y0=YW(ps)[0],y1=Math.max(S.year,today()[0])+1,ex={};
+  for(const k in S.done){const r=recOf(k);if(r&&r.x){const{a,id}=kSplit(k);(ex[id]=ex[id]||[]).push({c:cAt(r,a),k})}}
+  for(const t of S.tasks){const base=[];for(let y=y0;y<=y1;y++)weeksOf(t,y).forEach(w=>base.push(A(y,w)));base.sort((a,b)=>a-b);
+    const early=(ex[t.id]||[]).sort((a,b)=>a.c-b.c),rb=+t.rb||0,out=[];let off=0,reset=false,last=-1e9;
+    for(const p of base){if(!reset&&p>=rb){off=0;reset=true}
+      const e=p+off;if(e<ps||e<=last)continue;
+      const x=early.find(v=>v.c>last&&v.c<e);
+      if(x){USED.add(x.k);out.push({e,c:x.c,early:true,k:x.k});off+=x.c-e;last=x.c;continue}
+      const k=kOf(e,t.id),r=recOf(k);
+      if(r){USED.add(k);const c=Math.max(e,cAt(r,e));out.push({e,c,k,r});off+=c-e;last=c}
+      else{out.push({e,k});last=e}}
+    SCH.set(t.id,out)}}
+
 function fillSelects(){const N=nWeeks(S.year);
   $("nFreq").innerHTML=FREQ.map(f=>`<option value="${f.k}">${f.l}</option>`).join("");
-  const keep=$("nStart").value;
+  const kp=$("nStart").value;
   $("nStart").innerHTML=Array.from({length:N},(_,i)=>`<option value="${i+1}">KW ${i+1}</option>`).join("");
-  if(keep)$("nStart").value=Math.min(+keep,N)}
+  if(kp)$("nStart").value=Math.min(+kp,N)}
 
+const chipBtns=(sel,attr)=>S.people.map(p=>`<button type="button" class="pc${sel.includes(p.id)?" on":""}" ${attr}="${p.id}" title="${esc(p.n||p.k)}">${esc(p.k)}</button>`).join("");
 function renderList(){const N=nWeeks(S.year);$("cnt").textContent=S.tasks.length;
   $("list").innerHTML=S.tasks.length?sorted().map(t=>`<div class="task" data-id="${t.id}">
     <input type="color" value="${t.color}" data-f="color" aria-label="Farbe">
@@ -187,69 +258,155 @@ function renderList(){const N=nWeeks(S.year);$("cnt").textContent=S.tasks.length
       <select data-f="start">${Array.from({length:N},(_,i)=>`<option value="${i+1}"${i+1===Math.min(t.start,N)?" selected":""}>KW ${i+1}</option>`).join("")}</select>
       <input type="number" min="0" step="5" value="${dur(t)}" data-f="dur" aria-label="Dauer in Minuten" title="Dauer in Minuten">Min.
       <label class="lock"><input type="checkbox" data-f="lock"${t.lock?" checked":""}>fix</label>
+      ${S.people.length?`<span class="lock">Standard:<span class="pcs">${chipBtns(t.who,"data-who")}</span></span>`:""}
     </div></div>`).join(""):'<p class="hint">Noch keine Tätigkeiten. Fügen Sie oben die erste hinzu.</p>'}
 
-function renderGrid(){const C=cal(S.year),N=C.N;$("yl").textContent=`${S.year} · ${N} Kalenderwochen`;
+function renderPeople(){$("ppl").innerHTML=S.people.length?S.people.map(p=>`<div class="row" data-pid="${p.id}" style="padding:6px 0;border-top:1px solid var(--line);flex-wrap:nowrap">
+    <input type="text" value="${esc(p.k)}" data-pf="k" maxlength="3" style="width:64px" aria-label="Kürzel">
+    <input type="text" value="${esc(p.n||"")}" data-pf="n" placeholder="Name" style="flex:1;width:auto;min-width:0" aria-label="Name">
+    <button class="del" data-pdel title="Entfernen">×</button></div>`).join(""):'<p class="hint" style="margin:0">Noch keine Personen angelegt.</p>'}
+
+function renderSettings(){const ps=S.settings.planStart,[y,w]=ps?String(ps).split("_").map(Number):[today()[0],1],N=nWeeks(y);
+  $("psY").value=y;$("psW").innerHTML=Array.from({length:N},(_,i)=>`<option value="${i+1}"${i+1===Math.min(w,N)?" selected":""}>KW ${i+1}</option>`).join("");
+  const m=monday(y,Math.min(w,N));
+  $("psHint").textContent=(ps?"Der Plan gilt ab Montag, ":"Noch nicht festgelegt, aktuell gilt der Plan ab ")+fmt(m)+m.getUTCFullYear()+". Davor wird nichts angezeigt, gezählt oder als überfällig gemeldet."}
+
+function renderGrid(){build();const C=cal(S.year),N=C.N,ps=PS(),NOW=nowA(),pre=w=>A(S.year,w)<ps;
+  $("yl").textContent=`${S.year} · ${N} Kalenderwochen`;
   const T=sorted(),lc=Array(N).fill(0),lm=Array(N).fill(0);
-  const sets=T.map(t=>{const s=weeksOf(t);s.forEach(w=>{lc[w-1]++;lm[w-1]+=dur(t)});return s});
+  const sets=T.map(t=>{const m=new Map();(SCH.get(t.id)||[]).forEach(o=>{const[y,w]=YW(o.early?o.c:o.e);if(y===S.year&&!m.has(w))m.set(w,o)});
+    m.forEach((o,w)=>{lc[w-1]++;lm[w-1]+=dur(t)});return m});
   let mh='<tr><th class="nm"></th>',cur=-1,span=0,lab="";const flush=()=>{if(span)mh+=`<th class="mo" colspan="${span}">${lab}</th>`};
   for(let k=1;k<=N;k++){const m=C.mon[k];if(m!==cur){flush();cur=m;span=0;lab=MONTHS[m]}span++}flush();mh+="</tr>";
   const kh='<tr><th class="nm">Kalenderwoche</th>'+Array.from({length:N},(_,i)=>`<th class="kw${S.sel===i+1?" sel":""}" data-kw="${i+1}">${i+1}</th>`).join("")+"</tr>";
   const rows=T.map((t,ti)=>`<tr><td class="nm" draggable="true" data-t="${t.id}" title="${esc(t.name)} · ${fq(t.freq).l}${dur(t)?" · "+dur(t)+" Min.":""}"><span class="dot" style="display:inline-block;background:${t.color};margin-right:6px;vertical-align:-1px"></span>${esc(t.name)||"–"}</td>`+
-    Array.from({length:N},(_,i)=>{const on=sets[ti].has(i+1);return `<td class="c${on?" on":""}" data-t="${t.id}" data-w="${i+1}"${on?` draggable="true" style="background:${t.color}"`:""}></td>`}).join("")+"</tr>").join("");
+    Array.from({length:N},(_,i)=>{const w=i+1;if(pre(w))return '<td class="c pre"></td>';const o=sets[ti].get(w);if(!o)return `<td class="c" data-t="${t.id}" data-w="${w}"></td>`;
+      const dn=o.r||o.early,ms=!dn&&o.e+2<NOW;
+      return `<td class="c on${dn?" dn":ms?" ms":""}" data-t="${t.id}" data-w="${w}" draggable="true" style="background:${t.color}" title="${esc(t.name)} · KW ${w}${dn?" · erledigt":ms?" · verpasst":""}">${dn?"✓":""}</td>`}).join("")+"</tr>").join("");
   const mc=Math.max(1,...lc),mm=Math.max(1,...lm);
-  const lr='<tr class="load"><td class="nm">Aufgaben pro Woche</td>'+lc.map(v=>{const a=v?(0.15+0.7*v/mc):0;return `<td style="background:rgba(18,122,122,${a.toFixed(2)});color:${a>.5?"#fff":"inherit"}">${v||""}</td>`}).join("")+"</tr>";
-  const lh='<tr class="load"><td class="nm">Dauer pro Woche (Std.)</td>'+lm.map(v=>{const a=v?(0.15+0.7*v/mm):0;return `<td title="${v} Min." style="font-size:9px;background:rgba(201,110,20,${a.toFixed(2)});color:${a>.5?"#fff":"inherit"}">${v?hh(v):""}</td>`}).join("")+"</tr>";
+  const lr='<tr class="load"><td class="nm">Aufgaben pro Woche</td>'+lc.map((v,i)=>{if(pre(i+1))return '<td class="pre"></td>';const a=v?(0.15+0.7*v/mc):0;return `<td style="background:rgba(18,122,122,${a.toFixed(2)});color:${a>.5?"#fff":"inherit"}">${v||""}</td>`}).join("")+"</tr>";
+  const lh='<tr class="load"><td class="nm">Dauer pro Woche (Std.)</td>'+lm.map((v,i)=>{if(pre(i+1))return '<td class="pre"></td>';const a=v?(0.15+0.7*v/mm):0;return `<td title="${v} Min." style="font-size:9px;background:rgba(201,110,20,${a.toFixed(2)});color:${a>.5?"#fff":"inherit"}">${v?hh(v):""}</td>`}).join("")+"</tr>";
   $("grid").innerHTML=mh+kh+rows+lr+lh;
-  const tot=lc.reduce((a,b)=>a+b,0),mn=Math.min(...lc),tm=lm.reduce((a,b)=>a+b,0),mnm=Math.min(...lm);
-  $("stats").innerHTML=S.tasks.length?`<span>Aufgaben/Woche: Ø <b>${(tot/N).toFixed(1)}</b>, min <b>${mn}</b>, max <b>${mc>1||lc.some(v=>v)?Math.max(...lc):0}</b></span>`+
-    (tm?`<span>Dauer/Woche: Ø <b>${hh(tm/N)} Std.</b>, min <b>${hh(mnm)}</b>, max <b>${hh(Math.max(...lm))}</b></span><span>Gesamt im Jahr: <b>${hh(tm)} Std.</b></span>`:"")+`<span>Einsätze im Jahr: <b>${tot}</b></span>`:"";
-  renderWeek(T,sets)}
+  const act=[];for(let w=1;w<=N;w++)if(!pre(w))act.push(w-1);
+  if(S.tasks.length&&act.length){const L=act.map(i=>lc[i]),M=act.map(i=>lm[i]),tot=L.reduce((a,b)=>a+b,0),tm=M.reduce((a,b)=>a+b,0);
+    $("stats").innerHTML=(tm?`<span>Dauer/Woche: Ø <b>${hh(tm/act.length)} Std.</b>, min <b>${hh(Math.min(...M))}</b>, max <b>${hh(Math.max(...M))}</b></span><span>Gesamt: <b>${hh(tm)} Std.</b></span>`:"")+
+      `<span>Aufgaben/Woche: Ø <b>${(tot/act.length).toFixed(1).replace(".",",")}</b>, min <b>${Math.min(...L)}</b>, max <b>${Math.max(...L)}</b></span><span>Einsätze: <b>${tot}</b></span>`}
+  else $("stats").innerHTML="";
+  renderWeek();renderSum()}
 
-function renderWeek(T,sets){const N=nWeeks(S.year);if(!S.sel||S.sel>N)S.sel=Math.min(S.sel||1,N);
-  const m=monday(S.year,S.sel),e=new Date(m.getTime()+6*864e5),items=T.filter((t,i)=>sets[i].has(S.sel));
-  const dk=t=>S.year+"_"+S.sel+"_"+t.id,open=items.filter(t=>!S.done[dk(t)]),left=open.reduce((a,t)=>a+dur(t),0);
+// ---------- Reiter Woche ----------
+let WKI=[];
+const who=x=>Array.isArray(S.asg[x.k])?S.asg[x.k]:(x.t.who||[]);
+function renderWeek(){const N=nWeeks(S.year);if(!S.sel||S.sel>N)S.sel=Math.min(S.sel||1,N);
+  const W=A(S.year,S.sel),NOW=nowA(),ps=PS(),fut=W>NOW,m=monday(S.year,S.sel),en=new Date(m.getTime()+6*DAY),items=[];
+  if(W>=ps){for(const t of sorted()){const occ=SCH.get(t.id)||[];
+      occ.forEach((o,i)=>{if(o.early)return;const nx=occ[i+1],nE=nx?(nx.early?nx.c:nx.e):Infinity;
+        if(o.e===W)items.push({t,k:o.k,kind:"due",r:o.r||null,e:o.e});
+        else if(o.r){if(o.c===W&&o.e<W)items.push({t,k:o.k,kind:"late",r:o.r,e:o.e})}
+        else if(!fut&&W>o.e&&W-o.e<=2&&W<nE)items.push({t,k:o.k,kind:"over",lvl:W-o.e,e:o.e})});
+      const kx=kOf(W,t.id);if(!items.some(x=>x.k===kx)){const r=recOf(kx);if(S.extra[kx]||(r&&r.x))items.push({t,k:kx,kind:"extra",r,e:W})}}
+    for(const k in S.done){if(USED.has(k)||items.some(x=>x.k===k))continue;const{a,id}=kSplit(k);if(a!==W)continue;
+      const t=S.tasks.find(x=>x.id===id);if(t)items.push({t,k,kind:"orphan",r:recOf(k),e:W})}}
+  const rank=x=>x.kind==="over"?2-x.lvl:x.kind==="due"?2:3;
+  const open=items.filter(x=>!x.r).sort((a,b)=>rank(a)-rank(b)),dn=items.filter(x=>x.r);WKI=[...open,...dn];
+  const left=open.reduce((a,x)=>a+dur(x.t),0);
   $("wkTitle").textContent="KW "+S.sel+" · "+S.year;
-  $("wkSub").textContent=fmt(m)+" – "+fmt(e)+e.getUTCFullYear()+(items.length?" · "+(items.length-open.length)+" von "+items.length+" erledigt"+(left?" · noch "+left+" Min.":""):"");
-  $("wBar").style.width=(items.length?100*(items.length-open.length)/items.length:0)+"%";
-  $("wkList").innerHTML=items.length?items.map(t=>`<label class="wk-item big${S.done[dk(t)]?" done":""}"><input type="checkbox" data-done="${t.id}"${S.done[dk(t)]?" checked":""}><span class="dot" style="background:${t.color}"></span><span class="t">${esc(t.name)}<small style="display:block;color:var(--mute);font-size:12px">${fq(t.freq).l}${dur(t)?" · "+dur(t)+" Min.":""}</small></span></label>`).join(""):'<p class="hint">In dieser Woche ist nichts fällig.</p>';
+  $("wkSub").textContent=fmt(m)+" – "+fmt(en)+en.getUTCFullYear()+(WKI.length?" · "+dn.length+" von "+WKI.length+" erledigt"+(left?" · noch "+left+" Min.":""):"");
+  $("wBar").style.width=(WKI.length?100*dn.length/WKI.length:0)+"%";
+  const row=(x,i)=>{const t=x.t,r=x.r;let tag="",sub=[fq(t.freq).l];
+    if(x.kind==="over"){tag=`<span class="tag ${x.lvl>1?"r":"y"}">überfällig</span>`;sub=["fällig war KW "+YW(x.e)[1]]}
+    else if(x.kind==="extra")tag='<span class="tag x">zusätzlich</span>';
+    else if(x.kind==="late")tag=`<span class="tag x">aus KW ${YW(x.e)[1]}</span>`;
+    if(r){const ca=cAt(r,x.e);sub=[ca!==W?"erledigt in KW "+YW(ca)[1]:"erledigt"];const mn=r.min!=null?+r.min||0:dur(t);if(mn)sub.push(mn+" Min.");
+      const by=(Array.isArray(r.by)?r.by:[]).map(pid=>S.people.find(p=>p.id===pid)).filter(Boolean).map(p=>p.k);if(by.length)sub.push(by.join(", "))}
+    else if(dur(t))sub.push(dur(t)+" Min.");
+    const chips=!r&&S.people.length?`<span class="pcs">${chipBtns(who(x),"data-asg")}</span>`:"";
+    const rm=x.kind==="extra"&&!r?'<button type="button" class="del" data-rmx title="Entfernen">×</button>':"";
+    return `<div class="wk-item big${r?" done":""}${x.lvl?" over"+x.lvl:""}" data-i="${i}"><input type="checkbox" class="ck"${r?" checked":""}${fut&&!r?" disabled":""} aria-label="Erledigt"><span class="dot" style="background:${t.color}"></span><span class="t"><span class="nmx">${esc(t.name)}</span>${tag}<small>${esc(sub.join(" · "))}</small></span>${chips}${rm}</div>`};
+  let h="";
+  if(W<ps){const p=YW(ps);h=`<p class="hint">Vor dem Planstart (KW ${p[1]}/${p[0]}) ist nichts geplant.</p>`}
+  else if(!WKI.length)h='<p class="hint">In dieser Woche ist nichts fällig.</p>';
+  else{h=open.map((x,i)=>row(x,i)).join("")||'<p class="hint">Alles erledigt.</p>';
+    if(fut&&open.length)h+='<p class="hint">Abhaken geht ab Beginn der Woche. Zum Vorziehen fügen Sie die Aufgabe in der aktuellen Woche als zusätzliche Tätigkeit hinzu.</p>';
+    if(dn.length)h+='<div class="sec">Erledigt</div>'+dn.map((x,i)=>row(x,open.length+i)).join("")}
+  $("wkList").innerHTML=h;
+  const inW=new Set(WKI.map(x=>x.t.id)),cand=sorted().filter(t=>!inW.has(t.id));
+  $("wAddRow").style.display=W>=ps&&cand.length?"":"none";
+  $("wAdd").innerHTML='<option value="">Zusätzliche Tätigkeit …</option>'+cand.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("");
   $("grid").querySelectorAll(".kw").forEach(el=>el.classList.toggle("sel",+el.dataset.kw===S.sel))}
 
-// Verteilung: berücksichtigt Anzahl der Aufgaben UND Gesamtdauer pro Woche
-function addLoad(t,sg,lc,lm){weeksOf(t).forEach(w=>{lc[w-1]+=sg;lm[w-1]+=sg*dur(t)})}
-function bestStart(t,lc,lm,mb){const N=nWeeks(S.year),d=dur(t);let best=1,bc=Infinity;
-  for(let s=1;s<=N;s++){let c=0;weeksOf({freq:t.freq,start:s}).forEach(p=>{c+=(lc[p-1]+1)**2+((lm[p-1]+d)/mb)**2});if(c<bc-1e-9){bc=c;best=s}}
-  return best}
-function autoBalance(){const N=nWeeks(S.year),lc=Array(N).fill(0),lm=Array(N).fill(0);
-  S.tasks.filter(t=>t.lock).forEach(t=>addLoad(t,1,lc,lm));
-  const free=S.tasks.filter(t=>!t.lock).sort((a,b)=>fq(b.freq).c-fq(a.freq).c||dur(b)-dur(a));
-  const ds=S.tasks.filter(t=>dur(t)>0).map(dur),mb=ds.length?ds.reduce((a,b)=>a+b,0)/ds.length:1;
-  free.forEach(t=>{t.start=bestStart(t,lc,lm,mb);addLoad(t,1,lc,lm)});
-  for(let p=0;p<3;p++)free.forEach(t=>{addLoad(t,-1,lc,lm);t.start=bestStart(t,lc,lm,mb);addLoad(t,1,lc,lm)})}
+// ---------- Jahreszusammenfassung ----------
+function renderSum(){const y=S.year,ps=PS(),NOW=nowA(),pk=new Map(S.people.map(p=>[p.id,p])),tn=new Map(S.tasks.map(t=>[t.id,t]));
+  let n=0,mins=0;const byT={},byP={};
+  for(const k in S.done){const{a,id}=kSplit(k),t=tn.get(id);if(!t)continue;const r=recOf(k);if(!r)continue;const c=cAt(r,a);if(c<ps||YW(c)[0]!==y)continue;
+    const mn=r.min!=null?+r.min||0:dur(t),by=(Array.isArray(r.by)?r.by:[]).filter(i=>pk.has(i));
+    n++;mins+=mn;byT[id]=(byT[id]||0)+1;
+    by.forEach(i=>{const b=byP[i]||(byP[i]={n:0,m:0,t:{}});b.n++;b.m+=mn/by.length;b.t[id]=(b.t[id]||0)+1})}
+  let ok=0,late=0,miss=0,opn=0;
+  SCH.forEach(list=>list.forEach(o=>{const a=o.early?o.c:o.e;if(YW(a)[0]!==y||a>NOW)return;
+    if(o.early)ok++;else if(o.r)(o.c>o.e?late++:ok++);else if(o.e+2<NOW)miss++;else opn++}));
+  const top=o=>{const e=Object.entries(o).sort((a,b)=>b[1]-a[1])[0];return e?esc(tn.get(e[0]).name)+" ("+e[1]+"×)":"–"};
+  let h=`<h2>Zusammenfassung ${y}</h2>`;
+  if(!n&&!miss){$("sum").innerHTML=h+`<p class="hint" style="margin:0">Noch keine erledigten Aufgaben in ${y}.</p>`;return}
+  h+=`<div class="stats" style="margin:0 0 10px"><span>Erledigt: <b>${n}</b></span><span>Zeit: <b>${hh(mins)} Std.</b></span><span>Pünktlich <b>${ok}</b> · verspätet <b>${late}</b> · verpasst <b>${miss}</b>${opn?` · offen <b>${opn}</b>`:""}</span></div>`;
+  if(S.people.length)h+=`<table class="sum"><tr><th>Person</th><th>Aufgaben</th><th>Std.</th><th>Am häufigsten</th></tr>${S.people.map(p=>{const b=byP[p.id]||{n:0,m:0,t:{}};
+    return `<tr><td><b>${esc(p.k)}</b> ${esc(p.n||"")}</td><td>${b.n}</td><td>${hh(b.m)}</td><td>${top(b.t)}</td></tr>`}).join("")}</table>`;
+  const tops=Object.entries(byT).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id,c])=>esc(tn.get(id).name)+" ("+c+"×)").join(", ");
+  if(tops)h+=`<p class="hint">Am häufigsten erledigt: ${tops}. Bei mehreren Personen wird die Zeit aufgeteilt.</p>`;
+  $("sum").innerHTML=h}
+
+// ---------- Optimal verteilen: nur nach Minuten pro Woche ----------
+function autoBalance(){const N=nWeeks(S.year),ps=PS(),NOW=nowA(),lm=Array(N).fill(0),lc=Array(N).fill(0),act=Array.from({length:N},(_,i)=>A(S.year,i+1)>=ps);
+  const py=YW(ps),sMin=py[0]===S.year?Math.min(py[1],N):1;
+  const W=(t,s)=>weeksOf({freq:t.freq,start:s,ay:S.year},S.year);
+  const add=(ws,t,sg)=>ws.forEach(w=>{lm[w-1]+=sg*dur(t);lc[w-1]+=sg});
+  const best=t=>{const d=dur(t);let b=Math.max(+t.start||1,sMin),bc=Infinity;
+    for(let s=sMin;s<=N;s++){let c=0;W(t,s).forEach(p=>{if(act[p-1])c+=(lm[p-1]+d)**2+1e-6*(lc[p-1]+1)**2});if(c<bc-1e-9){bc=c;b=s}}return b};
+  S.tasks.filter(t=>t.lock).forEach(t=>add(weeksOf(t,S.year),t,1));
+  const free=S.tasks.filter(t=>!t.lock).sort((a,b)=>dur(b)*fq(b.freq).c-dur(a)*fq(a.freq).c);
+  const old=new Map(free.map(t=>[t.id,t.start+"/"+t.ay]));
+  free.forEach(t=>{t.start=best(t);t.ay=S.year;add(W(t,t.start),t,1)});
+  for(let p=0;p<4;p++)free.forEach(t=>{add(W(t,t.start),t,-1);t.start=best(t);add(W(t,t.start),t,1)});
+  free.forEach(t=>{if(old.get(t.id)!==t.start+"/"+t.ay)t.rb=NOW})}
+const replan=(t,s)=>{t.start=s;t.ay=S.year;t.rb=nowA()};
 
 function all(){save();renderList();renderGrid()}
 $("year").value=S.year;
 $("year").addEventListener("change",e=>{const y=+e.target.value;if(y>=2000&&y<=2100){S.year=y;S.sel=null;fillSelects();all()}});
 $("add").addEventListener("click",()=>{const n=$("nName").value.trim();if(!n){$("nName").focus();return}
-  S.tasks.push({id:Math.random().toString(36).slice(2,9),name:n,freq:$("nFreq").value,start:+$("nStart").value,dur:Math.max(0,+$("nDur").value||0),color:COLORS[S.tasks.length%COLORS.length],lock:false});
+  S.tasks.push({id:Math.random().toString(36).slice(2,9),name:n,freq:$("nFreq").value,start:+$("nStart").value,ay:S.year,rb:nowA(),dur:Math.max(0,+$("nDur").value||0),color:COLORS[S.tasks.length%COLORS.length],lock:false,who:[]});
   $("nName").value="";all();$("nName").focus()});
 $("nName").addEventListener("keydown",e=>{if(e.key==="Enter")$("add").click()});
 $("auto").addEventListener("click",()=>{if(S.tasks.length){autoBalance();all()}});
-$("print").addEventListener("click",()=>window.print());
+$("print").addEventListener("click",()=>{showTab("year");setTimeout(()=>window.print(),50)});
 const tOf=e=>{const id=e.target.closest(".task")?.dataset.id;return S.tasks.find(x=>String(x.id)===id)};
 $("list").addEventListener("input",e=>{const f=e.target.dataset.f,t=tOf(e);if(!t||!f)return;
   if(f==="name"||f==="color"){t[f]=e.target.value;save();renderGrid()}
   else if(f==="dur"){t.dur=Math.max(0,+e.target.value||0);save();renderGrid()}});
 $("list").addEventListener("change",e=>{const f=e.target.dataset.f,t=tOf(e);if(!t||!f)return;
-  if(f==="freq")t.freq=e.target.value;else if(f==="start")t.start=+e.target.value;else if(f==="lock")t.lock=e.target.checked;else return;
+  if(f==="freq"){t.freq=e.target.value;t.rb=nowA()}else if(f==="start")replan(t,+e.target.value);else if(f==="lock")t.lock=e.target.checked;else return;
   save();f==="freq"?all():renderGrid()});
-$("list").addEventListener("click",e=>{if(!e.target.hasAttribute("data-del"))return;const id=e.target.closest(".task").dataset.id;
-  S.tasks=S.tasks.filter(x=>String(x.id)!==id);all()});
+$("list").addEventListener("click",e=>{const b=e.target.closest("[data-who]");
+  if(b){const t=tOf(e);if(!t)return;const i=t.who.indexOf(b.dataset.who);i>-1?t.who.splice(i,1):t.who.push(b.dataset.who);save();renderList();renderGrid();return}
+  if(!e.target.hasAttribute("data-del"))return;const t=tOf(e);if(!t||!confirm(`„${t.name}“ löschen?`))return;
+  S.tasks=S.tasks.filter(x=>x!==t);all()});
+// Personen
+$("pAdd").onclick=()=>{const k=$("pK").value.trim().slice(0,3);if(!k){$("pK").focus();return}
+  S.people.push({id:Math.random().toString(36).slice(2,8),k,n:$("pN").value.trim().slice(0,40)});$("pK").value="";$("pN").value="";save();renderPeople();renderList();renderGrid()};
+$("ppl").addEventListener("input",e=>{const f=e.target.dataset.pf,p=S.people.find(x=>x.id===e.target.closest("[data-pid]")?.dataset.pid);if(!p||!f)return;
+  p[f]=e.target.value.trim().slice(0,f==="k"?3:40);save();renderList();renderGrid()});
+$("ppl").addEventListener("click",e=>{if(!e.target.hasAttribute("data-pdel"))return;const id=e.target.closest("[data-pid]").dataset.pid,p=S.people.find(x=>x.id===id);
+  if(!p||!confirm(`„${p.k}“ entfernen?`))return;S.people=S.people.filter(x=>x!==p);S.tasks.forEach(t=>t.who=t.who.filter(x=>x!==id));save();renderPeople();renderList();renderGrid()});
+// Planstart
+function setPS(y,w){if(!(y>=2000&&y<=2100))return;S.settings.planStart=y+"_"+Math.min(Math.max(w||1,1),nWeeks(y));save();renderSettings();renderGrid()}
+$("psY").onchange=()=>setPS(+$("psY").value,+$("psW").value);
+$("psW").onchange=()=>setPS(+$("psY").value,+$("psW").value);
+$("psNow").onclick=()=>setPS(...today());
 // Klick + Drag&Drop in der Übersicht
 const G=$("grid");let drag=null;
 G.addEventListener("click",e=>{const kw=e.target.closest("[data-kw]");if(kw){S.sel=+kw.dataset.kw;renderGrid();showTab("week");return}
-  const c=e.target.closest("td.c");if(!c||!$("tapEdit").checked)return;const t=S.tasks.find(x=>String(x.id)===c.dataset.t);if(!t)return;
-  t.start=+c.dataset.w;S.sel=t.start;all()});
+  const c=e.target.closest("td.c[data-w]");if(!c||!$("tapEdit").checked)return;const t=S.tasks.find(x=>String(x.id)===c.dataset.t);if(!t)return;
+  replan(t,+c.dataset.w);S.sel=t.start;all()});
 const clr=()=>G.querySelectorAll(".over,.ro").forEach(x=>x.classList.remove("over","ro"));
 G.addEventListener("dragstart",e=>{const c=e.target.closest("td[data-t]");if(!c)return;
   drag={id:c.dataset.t,type:c.classList.contains("nm")?"row":"cell"};e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain","x")});
@@ -257,15 +414,17 @@ G.addEventListener("dragover",e=>{const c=e.target.closest("td[data-t]");if(!dra
   if(drag.type==="cell"){if(c.dataset.t!==drag.id||!c.dataset.w)return;e.preventDefault();clr();c.classList.add("over")}
   else{if(c.dataset.t===drag.id)return;e.preventDefault();clr();c.closest("tr").classList.add("ro")}});
 G.addEventListener("drop",e=>{const c=e.target.closest("td[data-t]");if(!drag||!c)return;e.preventDefault();
-  if(drag.type==="cell"){const t=S.tasks.find(x=>String(x.id)===drag.id);if(t&&c.dataset.w&&c.dataset.t===drag.id){t.start=+c.dataset.w;S.sel=t.start}}
-  else{const i=S.tasks.findIndex(x=>String(x.id)===drag.id),j0=S.tasks.findIndex(x=>String(x.id)===c.dataset.t);
-    if(i>-1&&j0>-1){const [m]=S.tasks.splice(i,1);S.tasks.splice(S.tasks.findIndex(x=>String(x.id)===c.dataset.t),0,m)}}
+  if(drag.type==="cell"){const t=S.tasks.find(x=>String(x.id)===drag.id);if(t&&c.dataset.w&&c.dataset.t===drag.id){replan(t,+c.dataset.w);S.sel=t.start}}
+  else{const i=S.tasks.findIndex(x=>String(x.id)===drag.id);
+    if(i>-1&&S.tasks.some(x=>String(x.id)===c.dataset.t)){const [m]=S.tasks.splice(i,1);S.tasks.splice(S.tasks.findIndex(x=>String(x.id)===c.dataset.t),0,m)}}
   drag=null;all()});
 G.addEventListener("dragend",()=>{clr();drag=null});
 $("export").addEventListener("click",()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:"application/json"}));a.download="putzplan.json";a.click()});
 $("import").addEventListener("click",()=>$("file").click());
 $("file").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.tasks))throw 0;S=Object.assign({year:S.year,sel:null,done:S.done},d);S.tasks.forEach(t=>t.id=String(t.id).replace(/\W/g,""));$("year").value=S.year;fillSelects();all()}catch(x){alert("Die Datei konnte nicht gelesen werden.")}};
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.tasks))throw 0;
+    S=Object.assign({year:S.year,sel:null,done:S.done,extra:S.extra,asg:S.asg,people:S.people,settings:S.settings},d);norm();
+    $("year").value=S.year;fillSelects();renderPeople();renderSettings();all()}catch(x){alert("Die Datei konnte nicht gelesen werden.")}};
   r.readAsText(f);e.target.value=""});
 const q=new URLSearchParams(location.search).get("h");if(q){localStorage.setItem(CK,q.replace(/[^\w-]/g,""));history.replaceState(null,"",location.pathname)}
 $("code").value=localStorage.getItem(CK)||"";
@@ -275,13 +434,29 @@ function setWeek(y,k){S.year=y;S.sel=k;$("year").value=y;fillSelects();renderLis
 $("wPrev").onclick=()=>{let k=S.sel-1,y=S.year;if(k<1){y--;k=nWeeks(y)}setWeek(y,k)};
 $("wNext").onclick=()=>{let k=S.sel+1,y=S.year;if(k>nWeeks(y)){y++;k=1}setWeek(y,k)};
 $("wToday").onclick=()=>setWeek(...today());
-$("wkList").addEventListener("change",e=>{const id=e.target.dataset.done;if(id)toggleDone(id,e.target.checked)});
+// Woche: abhaken, zuteilen, zusätzliche Tätigkeit
+let DLG=null;
+const mkRec=(x,W,min,by)=>{const v={at:ywS(W),min,by};if(x.kind==="extra")v.x=1;return v};
+function act(x){const W=A(S.year,S.sel);if(x.r){put("done",x.k);return}if(W>nowA())return;
+  const dl=$("dlg");if(typeof dl.showModal!=="function"){put("done",x.k,mkRec(x,W,dur(x.t),who(x)));return}
+  DLG={x,W};$("dT").textContent=x.t.name;$("dMin").value=dur(x.t);
+  $("dPWrap").style.display=S.people.length?"":"none";$("dP").innerHTML=chipBtns(who(x),"data-p");dl.showModal()}
+$("dP").addEventListener("click",e=>{const b=e.target.closest(".pc");if(b)b.classList.toggle("on")});
+$("dCancel").onclick=()=>$("dlg").close("cancel");
+$("dlg").addEventListener("close",()=>{const d=$("dlg");
+  if(d.returnValue==="ok"&&DLG){const by=[...$("dP").querySelectorAll(".pc.on")].map(b=>b.dataset.p);put("done",DLG.x.k,mkRec(DLG.x,DLG.W,Math.max(0,Math.round(+$("dMin").value||0)),by))}
+  DLG=null;d.returnValue=""});
+$("wkList").addEventListener("click",e=>{const row=e.target.closest(".wk-item");if(!row)return;const x=WKI[+row.dataset.i];if(!x)return;
+  const a=e.target.closest("[data-asg]");if(a){const w=who(x).slice(),i=w.indexOf(a.dataset.asg);i>-1?w.splice(i,1):w.push(a.dataset.asg);put("asg",x.k,w);return}
+  if(e.target.closest("[data-rmx]")){put("extra",x.k);return}
+  if(e.target.classList.contains("ck")||e.target.closest(".t")||e.target===row){e.preventDefault();act(x)}});
+$("wAddBtn").onclick=()=>{const id=$("wAdd").value;if(id)put("extra",kOf(A(S.year,S.sel),id),true)};
 $("codeSave").onclick=()=>{const c=$("code").value.trim().replace(/[^\w-]/g,"");if(c.length<16)return alert("Der Haushalts-Code braucht mindestens 16 Zeichen (Buchstaben, Ziffern, Bindestrich). Tipp: „Neuen Code erzeugen“.");$("code").value=c;localStorage.setItem(CK,c);connect()};
 $("codeNew").onclick=()=>{const c=Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>b.toString(36).padStart(2,"0")).join("");$("code").value=c;localStorage.setItem(CK,c);connect()};
 $("codeLink").onclick=()=>{const c=localStorage.getItem(CK);if(!c)return alert("Bitte zuerst einen Haushalts-Code speichern.");const u=location.origin+location.pathname+"?h="+encodeURIComponent(c);if(navigator.share)navigator.share({url:u}).catch(()=>{});else navigator.clipboard.writeText(u).then(()=>alert("Link kopiert"))};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)renderGrid()});
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");
-fillSelects();all();connect();
-
+fillSelects();renderPeople();renderSettings();all();connect();
 </script>
 </body>
 </html>
