@@ -236,7 +236,7 @@ function occ(pl,lo,hi){const f=fq(pl.freq),an=+pl.an,r=[];if(hi<lo||isNaN(an))re
 function weeksOf(t,y=S.year){const s=new Set();occ({freq:t.freq,an:anOf(t)},A(y,1),A(y,nWeeks(y))).forEach(a=>s.add(YW(a)[1]));return s}
 // Grundtermine inkl. früherer Planstände (hist): jeder alte Plan gilt bis zu seinem „to“, danach der aktuelle ab rb
 function baseOf(t,lo,hi){const H=t.hist||[],out=[];let s=lo;
-  H.forEach((h,i)=>{occ(h,s,Math.min(+h.to,hi)).forEach(p=>out.push([p,i,+h.to]));s=Math.max(s,+h.to+1)});
+  H.forEach((h,i)=>{occ(h,s,Math.min(+h.to+(PER[h.freq]||4),hi)).forEach(p=>out.push([p,i,+h.to]));s=Math.max(s,+h.to+1)});
   const rb=+t.rb||0,st=H.length?Math.max(s,rb):lo;
   occ({freq:t.freq,an:anOf(t)},st,hi).forEach(p=>out.push([p,H.length?H.length:(p>=rb?1:0),Infinity]));
   return out}
@@ -260,10 +260,10 @@ function build(){SCH=new Map();USED=new Set();AVG=new Map();const ps=PS(),y1=Mat
     if(r.min!=null&&+r.min>0)(mm[id]=mm[id]||[]).push([cAt(r,a),+r.min])}
   for(const id in mm){const v=mm[id].sort((a,b)=>a[0]-b[0]).slice(-5);if(v.length>=2)AVG.set(id,Math.round(v.reduce((s,x)=>s+x[1],0)/v.length))}
   for(const t of S.tasks){const base=baseOf(t,lo,hi);
-    const early=(ex[t.id]||[]).sort((a,b)=>a.c-b.c),out=[];let off=0,seg=-1,last=-1e9;
+    const early=(ex[t.id]||[]).sort((a,b)=>a.c-b.c),per=PER[t.freq]||4,out=[];let off=0,seg=-1,last=-1e9;
     for(const[p,si,to]of base){if(si!==seg){seg=si;off=0}
       const e=p+off;if(e<ps||e<=last||e>to)continue;
-      const x=early.find(v=>v.c>last&&v.c<e);
+      const x=early.find(v=>v.c>last&&v.c<e&&e-v.c<per&&e-v.c<=v.c-last);
       if(x){USED.add(x.k);out.push({e,c:x.c,early:true,k:x.k});off+=x.c-e;last=x.c;continue}
       const k=kOf(e,t.id),r=recOf(k);
       if(r){USED.add(k);const c=Math.max(e,cAt(r,e));out.push({e,c,k,r});off+=c-e;last=c}
@@ -277,6 +277,8 @@ function fillSelects(){const N=nWeeks(S.year);
   if(kp)$("nStart").value=Math.min(+kp,N)}
 
 const chipBtns=(sel,attr)=>S.people.map(p=>`<button type="button" class="pc${sel.includes(p.id)?" on":""}" ${attr}="${p.id}" title="${esc(p.n||p.k)}">${esc(p.k)}</button>`).join("");
+const nextTxt=t=>{const ty=today()[0],n=nowA(),L=(SCH.get(t.id)||[]).filter(o=>!o.early&&o.e>=n).slice(0,5);
+  return L.length?L.map(o=>{const[y,w]=YW(o.e);return "KW "+w+(y!==ty?"/"+String(y).slice(2):"")+(o.r?" ✓":"")}).join(", "):"–"};
 function renderList(){const N=nWeeks(S.year);$("cnt").textContent=S.tasks.length;build();
   $("list").innerHTML=S.tasks.length?sorted().map(t=>{const ws=[...weeksOf(t)],st=ws.length?Math.min(...ws):1;return `<div class="task" data-id="${t.id}">
     <input type="color" value="${t.color}" data-f="color" aria-label="Farbe">
@@ -287,6 +289,7 @@ function renderList(){const N=nWeeks(S.year);$("cnt").textContent=S.tasks.length
       <select data-f="start" title="Erster Termin in ${S.year}">${Array.from({length:N},(_,i)=>`<option value="${i+1}"${i+1===st?" selected":""}>KW ${i+1}</option>`).join("")}</select>
       <input type="number" min="0" step="5" value="${dur(t)}" data-f="dur" aria-label="Geschätzte Dauer in Minuten" title="Geschätzte Dauer in Minuten">Min.
       ${AVG.has(t.id)?`<span class="lock" title="Durchschnitt der letzten erfassten Zeiten">Ø ${AVG.get(t.id)} gemessen</span>`:""}
+      <span class="lock" style="flex-basis:100%">Nächste: ${nextTxt(t)}</span>
       <label class="lock"><input type="checkbox" data-f="lock"${t.lock?" checked":""}>fix</label>
       ${S.people.length?`<span class="lock">Standard:<span class="pcs">${chipBtns(t.who,"data-who")}</span></span>`:""}
     </div></div>`}).join(""):'<p class="hint">Noch keine Tätigkeiten. Fügen Sie oben die erste hinzu.</p>'}
@@ -393,10 +396,15 @@ function renderSum(){const y=S.year,ps=PS(),NOW=nowA(),pk=new Map(S.people.map(p
 function autoBalance(){build();const NOW=nowA(),L=HZ(),H0=NOW+1,H1=NOW+L,ps=PS(),lm=Array(L).fill(0),lc=Array(L).fill(0);
   const add=(ws,d,sg)=>ws.forEach(a=>{const i=a-H0;if(i>=0&&i<L){lm[i]+=sg*d;lc[i]+=sg}});
   const free=[];
-  for(const t of S.tasks){const os=(SCH.get(t.id)||[]).filter(o=>!o.early&&o.e>=H0),d0=os.length?os[0].e:null;
+  for(const t of S.tasks){const oo=SCH.get(t.id)||[],os=oo.filter(o=>!o.early&&o.e>=H0),d0=os.length?os[0].e:null;
     if(t.lock||t.freq==="w1"||d0==null||d0>H1){add(os.map(o=>o.e),pd(t),1);continue}
     const per=PER[t.freq]||4,tol=per>=26?8:Math.max(1,Math.floor(per/2));
-    free.push({t,d:pd(t),d0,lo:Math.max(H0,ps,d0-tol),hi:Math.min(H1,d0+tol),a:d0,ws:[]})}
+    // letzter tatsächlicher Termin vor der nächsten Woche (erledigt: Erledigungswoche, offen: Planwoche)
+    const pa=oo.map(o=>o.early||o.r?o.c:o.e).filter(a=>a<H0),prev=pa.length?Math.max(...pa):null;
+    // nächster Termin frühestens nach ¾ und spätestens nach einem Intervall + Spielraum
+    let lo=prev!=null?prev+Math.ceil(per*.75):d0-tol,hi=prev!=null?prev+per+tol:d0+tol;
+    lo=Math.max(lo,H0,ps);hi=Math.min(Math.max(hi,lo),H1);
+    free.push({t,d:pd(t),d0,lo,hi,a:d0,ws:[]})}
   const wsOf=(f,a)=>occ({freq:f.t.freq,an:a},a,H1);
   const best=f=>{let b=f.d0,bc=Infinity;
     for(let a=f.lo;a<=f.hi;a++){const w=wsOf(f,a);if(!w.length)continue;let c=0;w.forEach(x=>{const i=x-H0;c+=lm[i]+1e-3*lc[i]});c/=w.length;
