@@ -147,6 +147,7 @@ input,select{font-size:16px}
     <p class="hint">„fix“ hält die Start-KW einer Aufgabe bei „Optimal verteilen“ fest.</p></div>
   <div class="card"><h2>Datensicherung</h2><div class="row"><button id="export">Exportieren</button><button id="import">Importieren</button><button id="print">Drucken</button></div>
     <input type="file" id="file" accept=".json" hidden></div>
+  <p class="hint" id="ver" style="text-align:center;margin:0 0 8px"></p>
 </section>
 </div>
 <nav class="tabs"><button class="on" id="t-week" data-tab="week">Woche</button><button id="t-year" data-tab="year">Jahr</button><button id="t-tasks" data-tab="tasks">Aufgaben</button></nav>
@@ -159,6 +160,7 @@ input,select{font-size:16px}
   <div class="row" style="margin-top:18px;justify-content:flex-end"><button type="button" id="dCancel">Abbrechen</button><button value="ok" class="primary">Erledigt</button></div>
 </form></dialog>
 <script>
+const APP_VERSION="1.4.0",APP_DATE="22.11.2026";
 const FREQ=[{k:"w1",l:"Wöchentlich",c:52},{k:"w2",l:"2-wöchentlich",c:26},{k:"m1",l:"Monatlich",c:12,mo:1},{k:"m2",l:"2-monatlich",c:6,mo:2},{k:"q",l:"Quartalsweise",c:4,mo:3},{k:"h",l:"Halbjährlich",c:2,mo:6},{k:"y",l:"Einmal im Jahr",c:1,mo:12}];
 const COLORS=["#e6194b","#3cb44b","#4363d8","#f58231","#911eb4","#0fa3b1","#d4a017","#f032e6","#7a9a01","#a0522d","#2f6f9f","#e07a9a"];
 const MONTHS=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
@@ -512,6 +514,7 @@ $("codeNew").onclick=()=>{const c=Array.from(crypto.getRandomValues(new Uint8Arr
 $("codeLink").onclick=()=>{const c=localStorage.getItem(CK);if(!c)return alert("Bitte zuerst einen Haushalts-Code speichern.");const u=location.origin+location.pathname+"?h="+encodeURIComponent(c);if(navigator.share)navigator.share({url:u}).catch(()=>{});else navigator.clipboard.writeText(u).then(()=>alert("Link kopiert"))};
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)renderGrid()});
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");
+$("ver").textContent="Putzplan · Version "+APP_VERSION+" · "+APP_DATE;
 norm();fillSelects();renderPeople();renderSettings();all();connect();
 </script>
 </body>
